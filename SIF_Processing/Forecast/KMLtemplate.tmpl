@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+@author:    Tim Furlong
+@summary:   Cheetah template file (.tmpl extension) which defines the layout for our
+            generated KML files. KML files are how we create the forecast on google earth.
+
+            For more on KML files see https://developers.google.com/kml/
+
+            See makeKML.py to see how you fill this on the python side of the cheetah
+            templating system.
+-->
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2" xmlns:kml="http://www.opengis.net/kml/2.2" xmlns:atom="http://www.w3.org/2005/Atom">
+    <Folder>
+        <name>$forecastfolder</name>
+    <!-- <description>Optional Folder Description tag</description> -->
+    <ScreenOverlay>
+        <visibility>1</visibility>
+        <Icon>
+          <href>http://cet.colorado.edu/~sif/Forecast/ForecastColorbar.png</href>
+        </Icon>
+        <drawOrder>0</drawOrder>
+        <color>ffffffff</color>
+        <overlayXY x="0" y="1" xunits="fraction" yunits="fraction"/>
+        <screenXY x="0" y="1" xunits="fraction" yunits="fraction"/>
+    </ScreenOverlay>
+    #for $dt, $photos in sorted($intervals.items()):
+    <Folder>
+        #set $folderName = '%d Minute Forecast' % $dt
+        <name>$folderName</name>
+        #for $p in $photos:
+      #if $dt==0:
+        <Placemark>
+           #set $pMarkName = 'Sensor %s' % $p['sensorID']
+               <name>$pMarkName</name>
+           <drawOrder>1</drawOrder>
+               <!-- <description>Optional placemark description</description> -->
+               <altitudeMode>relativeToGround</altitudeMode>
+               <extrude>1</extrude>
+           <Point>
+              <coordinates>$p['lon'],$p['lat'],0</coordinates>
+               </Point>
+            </Placemark>
+       #end if
+
+          <GroundOverlay>
+            <name>$p['sensorID']</name>
+            <color>c7ffffff</color> <!-- This makes it transparent -->
+            <drawOrder>1</drawOrder>
+            <!-- <description>Optional overlay description</description> -->
+            <altitudeMode>relativeToGround</altitudeMode>
+            <extrude>1</extrude>
+            <Icon>
+                <href>$p['publicpath']</href>
+            </Icon>
+                <LatLonBox>
+                    <north>$p['box'][0]</north>
+                    <south>$p['box'][1]</south>
+                    <east>$p['box'][2]</east>
+                    <west>$p['box'][3]</west>
+                <rotation>$p['rotation']</rotation>
+                </LatLonBox>
+          </GroundOverlay>
+        #end for
+      </Folder>
+      #end for
+    </Folder>
+</kml>
